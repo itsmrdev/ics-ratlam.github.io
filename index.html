@@ -281,11 +281,11 @@
   <script>
     const order_type = "Dine In"
     const products = [
-      { id: 1, name: "Coffee ddd dgfd ffdd g  dg d", description: "Hot Coffee", price: 30, category: "coffee", unique_number:1},
-      { id: 2, name: "Cold Coffee", description: "Iced Coffee", price: 60, category: "coffee", unique_number:2},
-      { id: 3, name: "Milkshake", description: "Chocolate Milk", price: 50, category: "milk", unique_number:3},
-      { id: 4, name: "Sandwich", description: "Grilled Sandwich", price: 40, category: "sandwich", unique_number:4},
-      { id: 5, name: "Noodles", description: "Veg Noodles", price: 70, category: "chinese", unique_number:5},
+      { id: 1, name: "Coffee ddd dgfd ffdd g  dg d", description: "Hot Coffee", price: 30, category: "coffee", unique_number:1, counter:1},
+      { id: 2, name: "Cold Coffee", description: "Iced Coffee", price: 60, category: "coffee", unique_number:2, counter:1},
+      { id: 3, name: "Milkshake", description: "Chocolate Milk", price: 50, category: "milk", unique_number:3, counter:2},
+      { id: 4, name: "Sandwich", description: "Grilled Sandwich", price: 40, category: "sandwich", unique_number:4, counter:2},
+      { id: 5, name: "Noodles", description: "Veg Noodles", price: 70, category: "chinese", unique_number:5, counter:1},
     ];
 
     const cart = [];
@@ -368,10 +368,8 @@
       console.log("QZ Tray Connected!");
     }).catch(console.error);
 
-      // Step 2: Print Test using ESC/POS commands
-      function printWithDefaultPrinter(print_type) {
+      function getPrintable(print_type){
 
-        
         let totalQty = 0;
         let totalAmount = 0;
         const invoiceNumber = 12334+1;
@@ -379,83 +377,114 @@
         const paidBy = 'Cash';
         const shopDetails = '28, Stadium Market, Ratlam, GSTIN: 23AGDPP8260G1ZF';
 
-          // Set configuration for the default printer
-          qz.printers.getDefault()
-              .then(printer => {
-                const data = [
+        let cust = [];
+        let kot = [];
+        const lastReciept = 3234223+1;//need to fetch
+        const lastOrder = 23+1;//need to fetch
+        if (print_type == 'cust' || print_type == 'both'){
+          cust = [
                     '\x1B\x40', // Initialize printer
                     '\x1B\x61\x01', // Center alignment
                     '\x1B\x21\x30', // Bold text, 2x width, 2x height
                     'Indian Coffee Shoppe\n',
                     '\x1B\x21\x00', // Normal text
                     `Order Type: ${order_type}\n`,
+                    `${lastReciept} #${lastOrder}\n`,
                     `${new Date().toLocaleString()}\n\n`,
                     '\x1B\x61\x00', // Left alignment
-                    '--------------------------------------------\n',
-                    'Item               Rate      Qty      Amount\n',
-                    '--------------------------------------------\n',
+                    '-----------------------------------------------\n',
+                    'Item                        Rate    Qty  Amount\n',
+                    '-----------------------------------------------\n',
                 ];
-                  // ESC/POS commands for printing
-                //   const data = [
-                //     '\x1B\x40',                    // Initialize printer
-                //     '\x1B\x61\x01',                // Center alignment
-                //     '\x1B\x21\x08',                // Bold text, double height
-                //     'Indian Coffee Shoppe\n',    // Shop Name
-                //     '\x1B\x21\x00',                // Normal text
-                //     `Wed, May 27, 2020 • 9:27:53 AM\n\n`,
-                //     '\x1B\x61\x00',                // Left alignment
-                //     `Invoice: ${invoiceNumber}\nOrder #: ${orderNumber}\n`,
-                //     `Paid By: ${paidBy}\n\n`,
-                //     '--------------------------------------------\n',
-                //     'Item                    Rate     Qty     Amt\n',
-                //     '--------------------------------------------\n',
-                //   ];
-
                   // Add items dynamically
                   cart.forEach((item) => {
-                    const name = item.name.length > 23 ? item.name.slice(0, 23) : item.name.padEnd(23);
-                    const rate = item.price.toFixed(2).padStart(6);
-                    const quantity = item.quantity.toString().padStart(3);
-                    const amount = (item.price * item.quantity).toFixed(2).padStart(7);
-                
+                    const name = item.name.length > 24 ? item.name.slice(0, 24) : item.name.padEnd(24);
+                    const rate = item.price.toFixed(0).padStart(6);
+                    const quantity = item.quantity.toString().padStart(5);
+                    const amount = (item.price * item.quantity).toFixed(0).padStart(7);
+                    totalQty += parseInt(quantity)
+                    totalAmount += parseFloat(amount)
                     const line = `${name} ${rate} ${quantity} ${amount}\n`;
-                    data.push(line);
+                    cust.push(line);
+                    if(item.details) cust.push(`${item.details}\n`);
                   });
 
-                  data.push('----------------------------------------\n');
-                  data.push(`Total Qty: ${totalQty}\n`);
-                  data.push(`Total Amount: ${totalAmount}\n`);
-                  data.push('\n');
-                  data.push('\x1B\x61\x01'); // Center alignment
-                  data.push('Thanks Do Visit Again Indian Coffee Shoppe (ICS)\n');
-                  data.push(`${shopDetails}\n`);
-                  data.push('\n\x1B\x64\x02'); // Feed 2 lines
-                  data.push('\x1D\x56\x41');  // Full cut
-                  data.push('\x1A\x61\x00');  // Full cut
-                  // const data = [
-                  //     '\x1B\x40',  // Initialize printer
-                  //     'Hello, Thermal Printer!\n',
-                  //     'This is a test page.\n',
-                  //     '\x1B\x21\x08', // Bold text
-                  //     'Thank you for using QZ Tray.\n',
-                  //     '\x1B\x64\x02',  // Feed 2 lines
-                  //     '\x1D\x56\x42',  // Cut paper
-                  //     '\x1D\x56\x41',  // Cut paper
-                  //     '\x1A\x61\x00', // Full cut (example command, might differ)
-                  // ];
-console.log(data,'dd')
+                  cust.push('-----------------------------------------------\n');
+                  cust.push(`\x1D\x21\x11`);
+                  cust.push(`Total Qty: ${totalQty}\n`);
+                  cust.push(`Total Amount: ${totalAmount}\n`);
+                  cust.push('\n');
+                  cust.push('-----------------------------------------------\n');
+                  cust.push('\x1B\x61\x01'); // Center alignment
+                  cust.push('\x1B\x21\x00'); // Normal text
+                  cust.push('Thanks Do Visit Again Indian Coffee Shoppe (ICS)\n');
+                  cust.push(`\x1D\x21\x11`);
+                  cust.push(`${shopDetails}\n`);
+                  cust.push('\n\x1B\x64\x02'); // Feed 2 lines
+                  cust.push('\x1D\x56\x41');  // Full cut
+                  cust.push('\x1A\x61\x00');  // Full cut
+        }
+        if(print_type == 'kot' || print_type == 'both'){
+            const counterType = [...new Set(cart.map((item) => item.counter))];
+// console.log(counterType,'counterType')
+            counterType.forEach((c_type) => {
+              const kotin = [
+                  '\x1B\x40', // Initialize printer
+                  '\x1B\x61\x01', // Center alignment
+                  '\x1B\x21\x30', // Bold text, 2x width, 2x height
+                  `Counter ${c_type}\n`,
+                  '\x1B\x21\x00', // Normal text
+                  `${new Date().toLocaleString()}\n\n`,
+                  `Order #${lastOrder}\n`,
+                  '\x1B\x61\x00', // Left alignment
+                  '-----------------------------------------------\n',
+                  'Item                                       Qty \n',
+                  '-----------------------------------------------\n',
+              ];
+              cart.forEach((item) => {
+                  if(c_type == item.counter){
+                      const name = item.name.length > 41 ? item.name.slice(0, 41) : item.name.padEnd(41);
+                      const quantity = item.quantity.toString().padStart(3);
+                      const line = `${name} ${quantity}\n`;
+                      kotin.push(line);
+                      
+                  }
+              });
+              kotin.push('-----------------------------------------------\n');
+              kotin.push('\x1D\x56\x41');  // Full cut
+              kotin.push('\x1A\x61\x00');  // Full cut
+              // console.log(kotin,'kotin')
+              // kot.concat(kotin)
+              kot = [...kot, ...kotin]
+            });
+            console.log(kot,'kot')
+
+        }
+        return [...cust, ...kot]
+                  
+      }
+      // Step 2: Print Test using ESC/POS commands
+      function printWithDefaultPrinter(print_type) {
+
+        const printData = getPrintable(print_type)
+        // console.log(printData,'printData')
+          // Set configuration for the default printer
+          qz.printers.getDefault()
+              .then(printer => {
+                
+                   
                   const config = qz.configs.create(printer); // Use the default printer
 
                   // Send the print job to the default printer
-                  qz.print(config, data)
-                      .then(() => {
-                          console.log("Print job sent successfully!");
-                          alert("Print job sent successfully!");
-                      })
-                      .catch(err => {
-                          console.error("Failed to print:", err);
-                          alert("Failed to print. Ensure QZ Tray is running and the printer is connected.");
-                      });
+                  qz.print(config, printData)
+                    .then(() => {
+                        console.log("Order sent successfully!");
+                        alert("Order sent successfully!");
+                    })
+                    .catch(err => {
+                        console.error("Failed to print:", err);
+                        alert("Failed to print. Ensure QZ Tray is running and the printer is connected.");
+                  });
               })
               .catch(err => {
                   console.error("Failed to get the default printer:", err);

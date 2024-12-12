@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://cdn.jsdelivr.net/npm/qz-tray/qz-tray.js"></script>
   <title>Home Page with Search</title>
   <style>
@@ -13,14 +14,17 @@
       padding: 0;
       background: #f9f9f9;
     }
-
+    /* table, td{
+      border: 1px solid black;
+    } */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #007bff;
+      background: lightslategray;
       padding: 10px 20px;
       color: #fff;
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
     }
 
     .header h1 {
@@ -61,7 +65,7 @@
 
     .search-bar input {
       width: 98%;
-      padding: 10px;
+      padding: 5px;
       font-size: 16px;
       border: 1px solid #ddd;
       border-radius: 5px;
@@ -74,22 +78,32 @@
     }
 
     .category {
-      background: #007bff;
-      color: white;
-      padding: 10px 20px;
+      background: #fff;
+      color: rgb(0, 0, 0);
+      padding: 8px 12px;
       border-radius: 20px;
+      border: 1px solid rgb(192, 192, 192);
       margin: 5px;
       cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
     }
 
     .category.active {
-      background: #0056b3;
+      background: #007bff;
+      color: white;
     }
 
     .products {
       display: grid;
       grid-template-columns: repeat(6, minmax(130px, 1fr));
       gap: 10px;
+      margin-bottom: 5px;
+      overflow-y: auto;
+      max-height: 500px;
+      border: 2px solid #d0c9c9;
+    padding: 5px;
+    border-radius: 10px;
     }
 
     .product {
@@ -99,6 +113,7 @@
       padding: 15px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       text-align: center;
+      cursor: pointer;
     }
 
     .product h3 {
@@ -143,7 +158,7 @@
     .total {
       font-size: 18px;
       font-weight: bold;
-      margin: 10px 0;
+      margin: 0px 0;
     }
 
     .actions {
@@ -176,32 +191,118 @@
     }
   </style>
   <style>
+        /* body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    } */
+    input {
+        width: 90%;
+        height: 32px;
+        margin: 4px 6px;
+        border: 1px solid lightgrey;
+        border-radius: 10px;
+    }
+    #search {
+        width: 90%;
+        height: 32px;
+        margin: 2px 0px !important;
+        border: 1px solid lightgrey;
+        border-radius: 10px;
+    }
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 300px;
+    }
+
+    .popup h2 {
+      margin: 0 0 10px;
+    }
+
+    .popup p {
+      font-size: 14px;
+      color: #555;
+      margin: 10px 0 20px;
+    }
+
+    .popup button {
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .popup button:hover {
+      background: #0056b3;
+    }
+
+    .show-popup-button {
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .show-popup-button:hover {
+      background: #218838;
+    }
+
     .cart-container {
-  flex: 3;
-  display: flex;
-  flex-direction: column-reverse; /* Start content from the bottom */
-  background: #fff;
-  border-radius: 15px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  height: 100%; /* Ensure it takes full height */
-  overflow-y: auto; /* Scroll if items exceed container height */
-}
+      flex: 3;
+      display: flex;
+      flex-direction: column-reverse; /* Start content from the bottom */
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+      padding: 5px;
+      height: 100%; /* Ensure it takes full height */
+      overflow-y: auto; /* Scroll if items exceed container height */
+  }
+  .delete {
+    color: red;
+    margin-left: 2px;
+  }
+  .cart {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* Items stack upward */
+      gap: 10px;
+  }
 
-.cart {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Items stack upward */
-  gap: 10px;
-}
-
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
-}
+  .cart-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+  }
 
 .cart-item:last-child {
   border-bottom: none;
@@ -233,12 +334,163 @@
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
 }
 
+    .order-history {
+      margin: 20px;
+      border: 1px solid #ccc;
+      border-collapse: collapse;
+    }
+
+    .order-history th, .order-history td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    .order-history th {
+      background-color: #f2f2f2;
+    }
+
+    .order-history .status {
+      display: inline-block;
+      padding: 2px 5px;
+      border-radius: 5px;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .order-history .shipping {
+      background-color: #f0ad4e;
+    }
+
+    .order-history .canceled {
+      background-color: #d9534f;
+    }
+
+    .order-history .delivered {
+      background-color: #5cb85c;
+    }
+
+    .order-history .blue {
+      background-color: #2278f3;
+    }
+
+    .order-history .more {
+      cursor: pointer;
+      color: #007bff;
+    }
   </style>
+  <style>
+    .menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.width60 {
+  width: 60%;
+  padding-right: 5px;
+}
+.width20 {
+  width: 20%;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.badge {
+  background-color: #007bff; /* Blue color */
+  color: white; /* White text */
+  font-size: 12px; /* Smaller font size */
+  font-weight: bold;
+  border-radius: 50%; /* Make it circular */
+  padding: 5px 10px; /* Adjust the padding to fit the number */
+  min-width: 0px; /* Minimum width for the badge */
+  text-align: center; /* Center the number */
+  line-height: 1; /* Align text vertically */
+  display: inline-block;
+}
+/* .cart-item span {
+    /* max-width: 57%; */
+/* } */
+.menu-trigger {
+  padding: 10px 20px;
+  /* background-color: #007bff; */
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.menu-popup {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  width: 200px;
+  display: none;
+  z-index: 1000;
+}
+
+.menu-popup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-popup li {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.menu-popup li:last-child {
+  border-bottom: none;
+}
+
+.menu-popup li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.menu-popup li a:hover {
+  background-color: #f1f1f1;
+}
+  </style>
+  <script>
+    function toggleMenu() {
+  const menu = document.getElementById('menuPopup');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+document.addEventListener('click', function (event) {
+  const menu = document.getElementById('menuPopup');
+  const trigger = document.querySelector('.menu-trigger');
+  
+  if (!menu.contains(event.target) && !trigger.contains(event.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+  </script>
 </head>
 <body>
   <div class="header">
     <h1>Indian Coffee Shoppe</h1>
-    <button>Logout</button>
+    <div>
+      <div class="menu-container">
+        <div class="menu-trigger" onclick="toggleMenu()"><i class="fa fa-bars" aria-hidden="true"></i></div>
+        <div class="menu-popup" id="menuPopup">
+          <ul>
+            <li onclick="getOrders()" ><a href="#">Orders</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- <button style="background-color: #ddd; color: #000;" onclick="showPopup('menu')" class="blue"><i class="fa fa-bars" aria-hidden="true"></i></button> -->
+      <button onclick="logout()">Logout</button>
+    </div>
   </div>
 
   <div class="main">
@@ -247,13 +499,14 @@
       <div class="search-bar">
         <input type="text" id="search" placeholder="Search for items...">
       </div>
-
       <div class="categories">
         <div class="category active" data-category="all">All</div>
-        <div class="category" data-category="coffee">Coffee</div>
-        <div class="category" data-category="milk">Milk</div>
-        <div class="category" data-category="sandwich">Sandwich</div>
-        <div class="category" data-category="chinese">Chinese</div>
+        <div class="category" data-category="HOT COFFEE">HOT COFFEE</div>
+        <div class="category" data-category="COLD COFFEE">COLD COFFEE</div>
+        <div class="category" data-category="REW SANDWICH">REW SANDWICH</div>
+        <div class="category" data-category="GRILLED SANDWICH">GRILLED SANDWICH</div>
+        <div class="category" data-category="FRAPPE SHAKE"> FRAPPE SHAKE</div>
+        <div class="category" data-category="MOCKTAILS"> MOCKTAILS</div>
       </div>
 
       <div class="products" id="product-list">
@@ -269,6 +522,11 @@
           <!-- Cart items will appear here -->
         </div>
         <div class="total">Total: Rs. <span id="total-amount">0</span></div>
+        <div style="display: flex; align-items: center;">
+          <input type="radio" name="order_type" value="dine_in" id="dine_in" checked style="width: 20px; margin-right: 5px;"> Dine In
+          <input type="radio" name="order_type" value="parcel" id="parcel" style="width: 20px; margin-right: 5px;"> Parcel
+        </div>
+
         <div class="actions">
           <button onclick="printWithDefaultPrinter('cust')" class="print-cost">Print Cost</button>
           <button onclick="printWithDefaultPrinter('kot')" class="print-kot">Print KOT</button>
@@ -276,19 +534,220 @@
         </div>
       </div>
     </div>
+    <div class="popup-overlay" id="popup">
+      <div class="popup">
+        <h2>Login</h2>
+        <input id="email" name="email" type="email" value="">
+        <input id="password" name="password" type="password" value="">
+        <button onclick="login()">Login</button>
+        <!-- <button onclick="closePopup()">Close</button> -->
+      </div>
+    </div>
+    
+    <div class="popup-overlay" id="orders">
+      <div class="popup" style="height: auto;width: auto;">
+        <h2>Orders</h2>
+        <table class="order-history">
+          <thead>
+            <tr>
+              <th>Delete</th>
+              <th>Sr.N.</th>
+              <th>Order date</th>
+              <th>Status</th>
+              <th>Amount</th>
+              <th>Print</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            
+          </tbody>
+        </table>
+        <div class="pagination" style="margin: 10px;">
+          
+          
+          <div class="pagination-controls">
+              <!-- Previous Button -->
+              <button id="prev_page" onclick="getOrders(currentPage - 1)" 
+                      >Previous</button>
+              
+              <!-- Page Numbers -->
+              <span id="page_numbers" value="`${currentPage}`">
+                  
+              </span>
+              <span class="pagination-info">
+                  <strong>Total Orders:</strong> <span id="total_count">0</span> &nbsp;
+                  <strong>Current Page:</strong> <span id="current_page">0</span> &nbsp;
+                  <strong>Total Pages:</strong> <span id="total_pages">0</span>
+              </span>
+      
+              <!-- Next Button -->
+              <button id="next_page" onclick="getOrders(currentPage + 1)">Next</button>
+          </div>
+      </div>
+        <button onclick="closePopup('orders')">Close</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const order_type = "Dine In"
-    const products = [
-      { id: 1, name: "Coffee ddd dgfd ffdd g  dg d", description: "Hot Coffee", price: 30, category: "coffee", unique_number:1, counter:1},
-      { id: 2, name: "Cold Coffee", description: "Iced Coffee", price: 60, category: "coffee", unique_number:2, counter:1},
-      { id: 3, name: "Milkshake", description: "Chocolate Milk", price: 50, category: "milk", unique_number:3, counter:2},
-      { id: 4, name: "Sandwich", description: "Grilled Sandwich", price: 40, category: "sandwich", unique_number:4, counter:2},
-      { id: 5, name: "Noodles", description: "Veg Noodles", price: 70, category: "chinese", unique_number:5, counter:1},
-    ];
+    // const API_URL = 'http://127.0.0.1:5000'
+    let currentPage = 1 
+    let token = null
+    const API_URL = 'https://ics-server.onrender.com'
+    document.addEventListener("DOMContentLoaded", async () => {
+      token = localStorage.getItem("token");
+      if (!token) {
+        showPopup();
+      }else{
+        await getProducts()
+      }
+    });
+    const getOrders = async (page=1,per_page=5)=>{
+        total_pages = document.getElementById("total_pages")
+        console.log(total_pages.innerHTML)
+        if (total_pages.innerHTML>0 && total_pages.innerHTML < page || 1 > page){
+          return false
+        }
+        const order_response = await fetch(`${API_URL}/orders/report?page=${page}&per_page=${per_page}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization':token
+          },
+          // params: JSON.stringify({ page, size })
+        });
 
-    const cart = [];
+        if (!order_response.ok) {
+          if (order_response.status === 401) {
+            alert("Unauthorized! Please log in again.");
+            showPopup()
+          }
+          throw new Error(`HTTP error! Status: ${order_response.status}`);
+        }
+
+        const data = await order_response.json();
+        let tBody = ``;
+        if(data.orders){
+          
+          
+          
+          data.orders.forEach(order => {
+          tBody +=`<tr id="order-${order.order_id}">
+                      <td>
+                        <span title="Delete Order" onclick="confirmOrderDelete(${order.order_id})" class="status canceled"><i class="fa fa-trash" aria-hidden="true"></i></span></span>
+                      </td>
+                      <td>${order.order_id}</td>
+                      <td>${order.created_at}</td>
+                      <td><span class="status delivered">Done</span></td>
+                      <td>${order.total_price}</td>
+                      <td>
+                        <span onclick='printReciept("cust",${JSON.stringify(order)})' title="Customer Reciept" class="more"><span class="status blue"><i class="fa fa-user" aria-hidden="true"></i></span>
+                        <span onclick='printReciept("kot",${JSON.stringify(order)})' title="Kot Reciept" class="status delivered"><i class="fa fa-print" aria-hidden="true"></i></span></span>
+                      </td>
+                      
+                  </tr>`
+          });
+          document.getElementById("total_count").innerHTML = data.total_orders;
+          document.getElementById("current_page").innerHTML = data.current_page;
+          currentPage = data.current_page
+          total_pages.innerHTML = data.total_pages;
+        }
+        showPopup('orders')
+        const OrderList = document.getElementById("tbody");
+        
+        OrderList.innerHTML = tBody;
+    }
+    // Function to show the popup
+    function showPopup(id='popup') {
+      document.getElementById(id).style.display = "flex";
+    }
+
+    // Function to close the popup
+    function closePopup(id='popup') {
+      document.getElementById(id).style.display = "none";
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      showPopup();
+    }
+
+     const login = async () =>{
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      if (email && password) {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Unauthorized! Please log in again.");
+            showPopup()
+          }
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Handle the response data
+        if (data.token) {
+          // Save token in localStorage
+          localStorage.setItem('token', data.token);
+          closePopup();
+          await getProducts();
+          alert('Login successful!');
+        } else {
+          localStorage.removeItem('token');
+          alert('Login failed: No token received');
+        }
+      } else {
+        alert("Please enter both username and password.");
+      }
+    }
+    let products = []
+    const getProducts = async () =>{
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+        const response = await fetch(`${API_URL}/items/list`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
+          },
+          // body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Unauthorized! Please log in again.");
+            showPopup()
+          }
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Handle the response data
+        if (data) {
+          // console.log(data)
+          products = data
+          loadProducts();
+        } else {
+          alert('Item not found');
+        }
+
+    }
+
+    
+
+    let cart = [];
     let currentCategory = "all";
 
     function loadProducts(category = "all", searchQuery = "") {
@@ -298,30 +757,82 @@
       const filteredProducts = products.filter(p => {
         const matchesCategory = category === "all" || p.category === category;
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        const matchesSearches = p.unique_number==searchQuery; 
+        return matchesCategory && matchesSearch || matchesSearches;
       });
 
       filteredProducts.forEach(product => {
         const productCard = document.createElement("div");
         productCard.className = "product";
+        productCard.onclick = function() {
+          addToCart(product.id);
+        };
         productCard.innerHTML = `
-        <div onclick="addToCart(${product.id})">
-          <h3>${product.name}</h3>
-          <p>${product.description}</p>
+        
+        <div >
+          <h3>${product.unique_number} ${product.name}</h3>
+          <p>${product.details??''}</p>
           <p class="price">Rs.${product.price}</p></div>
         `;
         productList.appendChild(productCard);
       });
     }
 
+    const confirmOrderDelete = async (order_id) =>{
+        const userInput = prompt("Enter the delete code to confirm deletion:");
+        if (userInput =='delete') {
+          const orderDelete = await fetch(`${API_URL}/orders/${order_id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
+              }
+            });
+            if (!orderDelete.ok) {
+              if (orderDelete.status === 401) {
+                alert("Unauthorized! Please log in again.");
+                showPopup()
+              }
+              throw new Error(`HTTP error! Status: ${orderDelete.status}`);
+            }else{
+              const orderElement = document.getElementById(`order-${order_id}`);
+  
+              // Check if the element exists
+              if (orderElement) {
+                // Remove the element from the DOM
+                orderElement.remove();
+                alert("Order deleted successfully");
+              } else {
+                console.log('Order element not found');
+                alert("Order deleted successfully");
+              }
+            }
+        }
+    }
     function addToCart(productId) {
       const product = products.find(p => p.id === productId);
       const cartItem = cart.find(c => c.id === productId);
       if (cartItem) {
         cartItem.quantity += 1;
       } else {
-        cart.push({ ...product, quantity: 1 });
+        cart.push({ ...product, item_id:product.id,quantity: 1 });
       }
+      updateCart();
+    }
+
+    function removeFromCart(productId) {
+      // Find the product from the products list (optional, but useful to get product info)
+      const product = products.find(p => p.id === productId);
+      
+      // Find the index of the cart item to remove
+      const cartItemIndex = cart.findIndex(c => c.id === productId);
+      
+      // If the item is found in the cart, remove it
+      if (cartItemIndex !== -1) {
+        cart.splice(cartItemIndex, 1); // Removes the item at the found index
+      }
+      
+      // Update the cart after removal
       updateCart();
     }
 
@@ -336,8 +847,10 @@
         const cartRow = document.createElement("div");
         cartRow.className = "cart-item";
         cartRow.innerHTML = `
-          <span>${item.name} x ${item.quantity}</span>
-          <span>Rs.${item.price * item.quantity}</span>
+          <span class="width60">${item.name} </span>
+          <span class="width20" >x${item.quantity}</span>
+          <span class="width20"> ${item.price * item.quantity} <span class="delete" onclick="removeFromCart(${item.id})"><i class="fa fa-trash-o"></i></span></span>
+          
         `;
         cartItems.appendChild(cartRow);
       });
@@ -353,34 +866,38 @@
         loadProducts(currentCategory, document.getElementById("search").value);
       });
     });
-
+    
     document.getElementById("search").addEventListener("input", (e) => {
       const searchQuery = e.target.value;
       loadProducts(currentCategory, searchQuery);
     });
-
+    
     // Initial load
-    loadProducts();
   </script>
   <script>
+
+    function printReciept(print_type, order){
+      console.log(order,'ssss')
+      const pData = getPrintable(order.items, order, print_type)
+      console.log(pData)
+    }
     // Start QZ Tray
     qz.websocket.connect().then(() => {
       console.log("QZ Tray Connected!");
     }).catch(console.error);
 
-      function getPrintable(print_type){
-
+      function getPrintable(printItem, order, print_type){
+        const order_type = document.getElementById("dine_in").checked?"Dine In":"Parcel"
+// console.log(order_type,'order_type',order,print_type,'sps')
         let totalQty = 0;
         let totalAmount = 0;
-        const invoiceNumber = 12334+1;
-        const orderNumber = 2+1;
         const paidBy = 'Cash';
         const shopDetails = '28, Stadium Market, Ratlam, GSTIN: 23AGDPP8260G1ZF';
 
         let cust = [];
         let kot = [];
-        const lastReciept = 3234223+1;//need to fetch
-        const lastOrder = 23+1;//need to fetch
+        const lastReciept = 'INVOICE#'+order?.order_id;//need to fetch
+        const lastOrder = order?.order_count??'RP';//need to fetch
         if (print_type == 'cust' || print_type == 'both'){
           cust = [
                     '\x1B\x40', // Initialize printer
@@ -388,16 +905,16 @@
                     '\x1B\x21\x30', // Bold text, 2x width, 2x height
                     'Indian Coffee Shoppe\n',
                     '\x1B\x21\x00', // Normal text
-                    `Order Type: ${order_type}\n`,
-                    `${lastReciept} #${lastOrder}\n`,
-                    `${new Date().toLocaleString()}\n\n`,
+                    `Order Type: ${order?.order_type??"Dine In"}\n`,
+                    `${lastReciept}            #${lastOrder}\n`,
+                    `${order.created_at??new Date().toLocaleString()}\n\n`,
                     '\x1B\x61\x00', // Left alignment
                     '-----------------------------------------------\n',
                     'Item                        Rate    Qty  Amount\n',
                     '-----------------------------------------------\n',
                 ];
                   // Add items dynamically
-                  cart.forEach((item) => {
+                  printItem.forEach((item) => {
                     const name = item.name.length > 24 ? item.name.slice(0, 24) : item.name.padEnd(24);
                     const rate = item.price.toFixed(0).padStart(6);
                     const quantity = item.quantity.toString().padStart(5);
@@ -411,23 +928,23 @@
 
                   cust.push('-----------------------------------------------\n');
                   cust.push(`\x1D\x21\x11`);
-                  cust.push(`Total Qty: ${totalQty}\n`);
-                  cust.push(`Total Amount: ${totalAmount}\n`);
+                  cust.push(`Total Qty:            ${totalQty}      \n`);
+                  cust.push(`Total Amount:                    ${totalAmount}\n`);
                   cust.push('\n');
-                  cust.push('-----------------------------------------------\n');
                   cust.push('\x1B\x61\x01'); // Center alignment
                   cust.push('\x1B\x21\x00'); // Normal text
+                  cust.push('-----------------------------------------------\n');
                   cust.push('Thanks Do Visit Again Indian Coffee Shoppe (ICS)\n');
-                  cust.push(`\x1D\x21\x11`);
                   cust.push(`${shopDetails}\n`);
                   cust.push('\n\x1B\x64\x02'); // Feed 2 lines
                   cust.push('\x1D\x56\x41');  // Full cut
                   cust.push('\x1A\x61\x00');  // Full cut
         }
         if(print_type == 'kot' || print_type == 'both'){
-            const counterType = [...new Set(cart.map((item) => item.counter))];
+            // const counterType = [...new Set(cart.map((item) => item.counter))];
 // console.log(counterType,'counterType')
-            counterType.forEach((c_type) => {
+            [1,2].forEach((c_type) => {
+              let isKotItem = false
               const kotin = [
                   '\x1B\x40', // Initialize printer
                   '\x1B\x61\x01', // Center alignment
@@ -441,13 +958,14 @@
                   'Item                                       Qty \n',
                   '-----------------------------------------------\n',
               ];
-              cart.forEach((item) => {
-                  if(c_type == item.counter){
+              printItem.forEach((item) => {
+
+                  if(c_type == 1 && ['REW SANDWICH','GRILLED SANDWICH'].includes(item.category) || c_type == 2 && !['REW SANDWICH','GRILLED SANDWICH'].includes(item.category)){
                       const name = item.name.length > 41 ? item.name.slice(0, 41) : item.name.padEnd(41);
                       const quantity = item.quantity.toString().padStart(3);
                       const line = `${name} ${quantity}\n`;
                       kotin.push(line);
-                      
+                      isKotItem = true
                   }
               });
               kotin.push('-----------------------------------------------\n');
@@ -455,7 +973,7 @@
               kotin.push('\x1A\x61\x00');  // Full cut
               // console.log(kotin,'kotin')
               // kot.concat(kotin)
-              kot = [...kot, ...kotin]
+              if (isKotItem) kot = [...kot, ...kotin]
             });
             console.log(kot,'kot')
 
@@ -463,11 +981,45 @@
         return [...cust, ...kot]
                   
       }
-      // Step 2: Print Test using ESC/POS commands
-      function printWithDefaultPrinter(print_type) {
 
-        const printData = getPrintable(print_type)
-        // console.log(printData,'printData')
+      const placeOrder = async () => {
+        let orderData = {"items":cart,"order_type":document.getElementById("dine_in").checked?"Dine In":"Parcel"}
+        const orderResponse = await fetch(`${API_URL}/orders/place`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
+          },
+          body: JSON.stringify(orderData)
+        });
+        if (!orderResponse.ok) {
+          if (orderResponse.status === 401) {
+            alert("Unauthorized! Please log in again.");
+            showPopup()
+          }
+          throw new Error(`HTTP error! Status: ${orderResponse.status}`);
+        }
+
+        const orderDatas = await orderResponse.json();
+        return orderDatas
+        
+      }
+      // Step 2: Print Test using ESC/POS commands
+      const printWithDefaultPrinter = async (print_type) =>{
+        if(!cart.length){
+          alert('Please add item in cart')
+          return false
+        } 
+        const order = await placeOrder();
+        if(!order){
+          alert('Internal Error, Please try again after sometime')
+          return false
+        } 
+        let printItem = [...cart];
+        cart = []
+        updateCart()
+        const printData = getPrintable(printItem,order, print_type)
+        console.log(printData,'printData')
           // Set configuration for the default printer
           qz.printers.getDefault()
               .then(printer => {

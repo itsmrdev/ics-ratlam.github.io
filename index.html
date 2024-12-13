@@ -60,7 +60,7 @@
     }
 
     .search-bar {
-      margin-bottom: 20px;
+      margin-bottom: 08px;
     }
 
     .search-bar input {
@@ -72,7 +72,7 @@
     }
 
     .categories {
-      margin-bottom: 20px;
+      margin-bottom: 08px;
       display: flex;
       flex-wrap: wrap;
     }
@@ -457,6 +457,21 @@
 .menu-popup li a:hover {
   background-color: #f1f1f1;
 }
+
+  .alert {
+        display: none;
+        padding: 4px 28px;
+        /* background: green; */
+        height: 30px;
+        border-radius: 8px;
+        align-content: center;
+  }
+  .success {
+    background-color: green;
+  }
+  .danger {
+    background-color: red;
+  }
   </style>
   <script>
     function toggleMenu() {
@@ -476,14 +491,19 @@ document.addEventListener('click', function (event) {
   </script>
 </head>
 <body>
+  
   <div class="header">
     <h1>Indian Coffee Shoppe</h1>
+    <div id="custom_alert" class="alert success">
+      <strong>Indicates a successful or positive action.</strong>
+    </div>
     <div>
       <div class="menu-container">
         <div class="menu-trigger" onclick="toggleMenu()"><i class="fa fa-bars" aria-hidden="true"></i></div>
         <div class="menu-popup" id="menuPopup">
           <ul>
             <li onclick="getOrders()" ><a href="#">Orders</a></li>
+            <li onclick="getReports()" ><a href="#">Report</a></li>
           </ul>
         </div>
       </div>
@@ -510,7 +530,7 @@ document.addEventListener('click', function (event) {
       </div>
 
       <div class="products" id="product-list">
-        <!-- Products will be loaded dynamically here -->
+        <span style="padding: 5px;">Items are loading</span>
       </div>
     </div>
 
@@ -587,9 +607,33 @@ document.addEventListener('click', function (event) {
         <button onclick="closePopup('orders')">Close</button>
       </div>
     </div>
+
+
+    <div class="popup-overlay" id="reports">
+      <div class="popup" style="height: auto;width: 430px;">
+        <h2>Reports</h2>
+        
+        <button onclick="closePopup('reports')">Close</button>
+      </div>
+    </div>
   </div>
 
   <script>
+
+    function hideAlert() {
+        const alert = document.getElementById('custom_alert');
+        alert.style.display = 'none'; // Hide the alert
+        alert.innerHTML = ''; // Clear the content
+    }
+
+    function showAlert(message, type="success"){
+      const alert = document.getElementById('custom_alert');
+      alert.style.display = 'block'; // Hide the alert
+      alert.style.backgroundColor = type=="success"?'green':'orange'; // Hide the alert
+      alert.innerHTML = `<strong>${message}</strong>`; // Clear the content
+      // Set a timer to call hideAlert after 5 seconds (5000 milliseconds)
+      setTimeout(hideAlert, 5000);
+    }
     // const API_URL = 'http://127.0.0.1:5000'
     let currentPage = 1 
     let token = null
@@ -619,10 +663,10 @@ document.addEventListener('click', function (event) {
 
         if (!order_response.ok) {
           if (order_response.status === 401) {
-            alert("Unauthorized! Please log in again.");
+            showAlert("Unauthorized! Please log in again.","failed")
             showPopup()
           }
-          throw new Error(`HTTP error! Status: ${order_response.status}`);
+          showAlert(`HTTP error! Status: ${order_response.status}`, "failed")
         }
 
         const data = await order_response.json();
@@ -657,6 +701,33 @@ document.addEventListener('click', function (event) {
         
         OrderList.innerHTML = tBody;
     }
+
+    const getReports = async (from=null, to=null)=>{
+        
+        const order_response = await fetch(`${API_URL}/orders/report`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization':token
+          },
+          // params: JSON.stringify({ page, size })
+        });
+
+        if (!order_response.ok) {
+          if (order_response.status === 401) {
+            showAlert("Unauthorized! Please log in again.","failed")
+            showPopup()
+          }
+          showAlert(`HTTP error! Status: ${order_response.status}`,"failed")
+        }
+
+        const data = await order_response.json();
+        let tBody = ``;
+        if(data.orders){
+        
+        }
+        showPopup('reports')
+    }
     // Function to show the popup
     function showPopup(id='popup') {
       document.getElementById(id).style.display = "flex";
@@ -687,10 +758,10 @@ document.addEventListener('click', function (event) {
 
         if (!response.ok) {
           if (response.status === 401) {
-            alert("Unauthorized! Please log in again.");
+            showAlert("Unauthorized! Please log in again.","failed")
             showPopup()
           }
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          showAlert(`HTTP error! Status: ${response.status}`, "failed")
         }
 
         const data = await response.json();
@@ -701,13 +772,13 @@ document.addEventListener('click', function (event) {
           localStorage.setItem('token', data.token);
           closePopup();
           await getProducts();
-          alert('Login successful!');
+          showAlert("Success! Login successfull.","success")
         } else {
           localStorage.removeItem('token');
-          alert('Login failed: No token received');
+          showAlert("Login failed: No token received","failed")
         }
       } else {
-        alert("Please enter both username and password.");
+        showAlert("Please enter both username and password.", "failed");
       }
     }
     let products = []
@@ -726,10 +797,10 @@ document.addEventListener('click', function (event) {
 
         if (!response.ok) {
           if (response.status === 401) {
-            alert("Unauthorized! Please log in again.");
+            showAlert("Unauthorized! Please log in again.", "failed");
             showPopup()
           }
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          showAlert(`HTTP error! Status: ${response.status}`, "failed");
         }
 
         const data = await response.json();
@@ -740,12 +811,19 @@ document.addEventListener('click', function (event) {
           products = data
           loadProducts();
         } else {
-          alert('Item not found');
+          showAlert("Item not found", "failed");
         }
 
     }
 
-    
+    document.getElementById('search').addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        const inputValue = event.target.value;
+        addToCart(inputValue)
+        event.target.value = ''
+        loadProducts('all', '');
+      }
+    });
 
     let cart = [];
     let currentCategory = "all";
@@ -790,10 +868,10 @@ document.addEventListener('click', function (event) {
             });
             if (!orderDelete.ok) {
               if (orderDelete.status === 401) {
-                alert("Unauthorized! Please log in again.");
+                showAlert("Unauthorized! Please log in again.", "success");
                 showPopup()
               }
-              throw new Error(`HTTP error! Status: ${orderDelete.status}`);
+              showAlert(`HTTP error! Status: ${orderDelete.status}`, "failed")
             }else{
               const orderElement = document.getElementById(`order-${order_id}`);
   
@@ -801,17 +879,16 @@ document.addEventListener('click', function (event) {
               if (orderElement) {
                 // Remove the element from the DOM
                 orderElement.remove();
-                alert("Order deleted successfully");
+                showAlert("Order deleted successfully", "success");
               } else {
-                console.log('Order element not found');
-                alert("Order deleted successfully");
+                showAlert("Order not deleted successfully", "failed");
               }
             }
         }
     }
     function addToCart(productId) {
-      const product = products.find(p => p.id === productId);
-      const cartItem = cart.find(c => c.id === productId);
+      const product = products.find(p => p.id === parseInt(productId));
+      const cartItem = cart.find(c => c.id === parseInt(productId));
       if (cartItem) {
         cartItem.quantity += 1;
       } else {
@@ -873,13 +950,11 @@ document.addEventListener('click', function (event) {
     });
     
     // Initial load
-  </script>
-  <script>
 
     function printReciept(print_type, order){
       console.log(order,'ssss')
       const pData = getPrintable(order.items, order, print_type)
-      console.log(pData)
+      sendToPrinter(pData)
     }
     // Start QZ Tray
     qz.websocket.connect().then(() => {
@@ -994,10 +1069,10 @@ document.addEventListener('click', function (event) {
         });
         if (!orderResponse.ok) {
           if (orderResponse.status === 401) {
-            alert("Unauthorized! Please log in again.");
+            showAlert("Unauthorized! Please log in again.", "failed");
             showPopup()
           }
-          throw new Error(`HTTP error! Status: ${orderResponse.status}`);
+          showAlert(`HTTP error! Status: ${orderResponse.status}`, "failed");
         }
 
         const orderDatas = await orderResponse.json();
@@ -1007,12 +1082,12 @@ document.addEventListener('click', function (event) {
       // Step 2: Print Test using ESC/POS commands
       const printWithDefaultPrinter = async (print_type) =>{
         if(!cart.length){
-          alert('Please add item in cart')
+          showAlert('Please add item in cart', "failed");
           return false
         } 
         const order = await placeOrder();
         if(!order){
-          alert('Internal Error, Please try again after sometime')
+          showAlert('Internal Error, Please try again after sometime', "failed");
           return false
         } 
         let printItem = [...cart];
@@ -1020,30 +1095,29 @@ document.addEventListener('click', function (event) {
         updateCart()
         const printData = getPrintable(printItem,order, print_type)
         console.log(printData,'printData')
-          // Set configuration for the default printer
-          qz.printers.getDefault()
-              .then(printer => {
-                
-                   
-                  const config = qz.configs.create(printer); // Use the default printer
-
-                  // Send the print job to the default printer
-                  qz.print(config, printData)
-                    .then(() => {
-                        console.log("Order sent successfully!");
-                        alert("Order sent successfully!");
-                    })
-                    .catch(err => {
-                        console.error("Failed to print:", err);
-                        alert("Failed to print. Ensure QZ Tray is running and the printer is connected.");
-                  });
-              })
-              .catch(err => {
-                  console.error("Failed to get the default printer:", err);
-                  alert("Failed to get the default printer. Make sure your printer is set as the default.");
-              });
+        sendToPrinter(printData)
       }
 
+      function sendToPrinter (printData){
+        // Set configuration for the default printer
+          qz.printers.getDefault().then(printer => {
+              const config = qz.configs.create(printer); // Use the default printer
+              // Send the print job to the default printer
+              qz.print(config, printData)
+                .then(() => {
+                    console.log("Order print successfully!");
+                    showAlert('Order placed/print successfully', "success");
+                })
+                .catch(err => {
+                    console.error("Failed to print:", err);
+                    showAlert("Failed to print. Ensure QZ Tray is running and the printer is connected.", "failed");
+              });
+          }).catch(err => {
+              showAlert("Failed to get the default printer. Make sure your printer is set as the default.", "failed");
+              console.error("Failed to get the default printer:", err);
+          });
+
+      }
 
       // Optional: Disconnect from QZ Tray when page is unloaded
       window.addEventListener("beforeunload", () => {

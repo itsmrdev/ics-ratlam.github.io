@@ -25,6 +25,8 @@
       padding: 10px 20px;
       color: #fff;
       box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+      border-bottom-right-radius: 20px;
+      border-bottom-left-radius: 20px;
     }
 
     .header h1 {
@@ -80,7 +82,7 @@
     .category {
       background: #fff;
       color: rgb(0, 0, 0);
-      padding: 8px 12px;
+      padding: 5px 10px;
       border-radius: 20px;
       border: 1px solid rgb(192, 192, 192);
       margin: 5px;
@@ -118,7 +120,7 @@
 
     .product h3 {
       margin: 0;
-      font-size: 18px;
+      font-size: 15px;
     }
 
     .product p {
@@ -842,9 +844,11 @@ document.addEventListener('click', function (event) {
       filteredProducts.forEach(product => {
         const productCard = document.createElement("div");
         productCard.className = "product";
+        productCard.style.backgroundColor = cart.find(item =>item.id==product.id)?'#778899':'white';
         productCard.onclick = function() {
           addToCart(product.id);
         };
+
         productCard.innerHTML = `
         
         <div >
@@ -894,6 +898,7 @@ document.addEventListener('click', function (event) {
       } else {
         cart.push({ ...product, item_id:product.id,quantity: 1 });
       }
+      loadProducts(currentCategory, document.getElementById("search").value);
       updateCart();
     }
 
@@ -911,6 +916,7 @@ document.addEventListener('click', function (event) {
       
       // Update the cart after removal
       updateCart();
+      loadProducts(currentCategory, document.getElementById("search").value);
     }
 
     function updateCart() {
@@ -1093,6 +1099,7 @@ document.addEventListener('click', function (event) {
         let printItem = [...cart];
         cart = []
         updateCart()
+        loadProducts('all','')
         const printData = getPrintable(printItem,order, print_type)
         console.log(printData,'printData')
         sendToPrinter(printData)

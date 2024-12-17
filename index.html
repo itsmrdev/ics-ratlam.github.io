@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://cdn.jsdelivr.net/npm/qz-tray/qz-tray.js"></script>
   <title>Home Page with Search</title>
@@ -449,7 +450,9 @@
 .menu-popup li:last-child {
   border-bottom: none;
 }
-
+.form-control{
+  width: 50% !important;
+}
 .menu-popup li a {
   text-decoration: none;
   color: #333;
@@ -614,13 +617,46 @@ document.addEventListener('click', function (event) {
     <div class="popup-overlay" id="reports">
       <div class="popup" style="height: auto;width: 430px;">
         <h2>Reports</h2>
+        <input style="width: 50%;" type="text" id="date_range" placeholder="YYYY-MM-DD to YYYY-MM-DD">
+        <button onclick="getReports()">Search</button>
         
+        <table class="order-history" style="width: 90%;">
+          <thead>
+            <tr>
+              <th style="color: green;">Amount</th>
+              <th>Category</th>
+              <th>Items</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody id="report-tbody">
+            
+          </tbody>
+        </table>
         <button onclick="closePopup('reports')">Close</button>
       </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <script>
+    function formatDate(date) {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+    }
+
+    // Set default dates (current date)
+    const today = formatDate(new Date());
+    flatpickr("#date_range", {
+            mode: "range",
+            dateFormat: "Y-m-d", // Format YYYY-MM-DD
+            altInput: true,
+            altFormat: "Y-m-d",
+            defaultDate: [today, today] // Optional default dates
+        });
 
     function hideAlert() {
         const alert = document.getElementById('custom_alert');
@@ -636,10 +672,10 @@ document.addEventListener('click', function (event) {
       // Set a timer to call hideAlert after 5 seconds (5000 milliseconds)
       setTimeout(hideAlert, 5000);
     }
-    // const API_URL = 'http://127.0.0.1:5000'
+    const API_URL = 'http://127.0.0.1:5000'
     let currentPage = 1 
     let token = null
-    const API_URL = 'https://ics-server.onrender.com'
+    // const API_URL = 'https://ics-server.onrender.com'
     document.addEventListener("DOMContentLoaded", async () => {
       token = localStorage.getItem("token");
       if (!token) {
@@ -705,14 +741,15 @@ document.addEventListener('click', function (event) {
     }
 
     const getReports = async (from=null, to=null)=>{
-        
-        const order_response = await fetch(`${API_URL}/orders/report`, {
+      const dateRange = document.getElementById("date_range").value;
+      let [start_date, end_date] = dateRange.split(" to ");
+      if (!end_date) end_date = start_date
+        const order_response = await fetch(`${API_URL}/orders/daily_report?start_date=${start_date}&end_date=${end_date}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization':token
-          },
-          // params: JSON.stringify({ page, size })
+          }
         });
 
         if (!order_response.ok) {
@@ -725,9 +762,19 @@ document.addEventListener('click', function (event) {
 
         const data = await order_response.json();
         let tBody = ``;
-        if(data.orders){
-        
+        if(data.report){
+          tBody +=`<tr id="reports">
+                    
+                      <td>${data.report.total_amount_received}</td>
+                      <td>${data.report.total_categories_sold}</td>
+                      <td>${data.report.total_items_sold}</td>
+                      <td>${data.report.total_quantity_sold}</td>
+                      
+                  </tr>`
         }
+        const ReportData = document.getElementById("report-tbody");
+        
+        ReportData.innerHTML = tBody;
         showPopup('reports')
     }
     // Function to show the popup
